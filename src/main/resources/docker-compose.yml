@@ -1,0 +1,13 @@
+version: '3.2'
+services:
+  cantor-db:
+    image: mariadb
+    restart: always
+    container_name: cantor-db
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_USER: mariadb
+      MYSQL_ROOT_PASSWORD: mariadb
+      MYSQL_PASSWORD: mariadb
+      MYSQL_DATABASE: mariadb
