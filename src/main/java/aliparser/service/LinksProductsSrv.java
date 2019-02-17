@@ -36,7 +36,7 @@ public class LinksProductsSrv {
         for(LinksGroupEntity group: groups) {
             String url = group.getUrlGroup();
             String[] parts = url.split("1.html");
-            for (int i = 0; i < maxPage; i++) {
+            for (int i = 1; i < maxPage + 1; i++) {
                 String pageURL = parts[0] + i + ".html";
                 priceOnePage(pageURL);
             }
@@ -50,7 +50,12 @@ public class LinksProductsSrv {
             List<String> products = parseGroup(doc);
             List<LinksProductsEntity> productsEntities = products
                     .stream()
-                    .map(pr -> new LinksProductsEntity(url, pr))
+                    .map(pr -> {
+                        String prefix = pr.split(".html")[0];
+                        Integer inx = prefix.lastIndexOf("/");
+                        String id = prefix.substring(inx + 1);
+                        return new LinksProductsEntity(id, pr, url);
+                    })
                     .collect(Collectors.toList());
             linksProductsRepo.saveAll(productsEntities);
         } catch (IOException e) {

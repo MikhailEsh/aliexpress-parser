@@ -9,25 +9,24 @@ import javax.persistence.*;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "links_products")
 public class LinksProductsEntity {
 
-    public LinksProductsEntity( String urlGroup, String urlProduct) {
-        this.urlGroup = urlGroup;
-        this.urlProduct = urlProduct;
-    }
 
-
-    @Basic
-    @Column(name = "url_group")
-    private String urlGroup;
+    @Id
+    @Column(name = "id")
+    private String id;
 
     @Basic
     @Column(name = "url_product")
     private String urlProduct;
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Basic
+    @Column(name = "url_group")
+    private String urlGroup;
+
+
+
+
 }
