@@ -4,6 +4,7 @@ package aliparser.service;
 import aliparser.dao.ErrorsRepo;
 import aliparser.dao.LinksProductsRepo;
 import aliparser.entities.ErrorsEntity;
+import aliparser.entities.LinksGroupEntity;
 import aliparser.entities.LinksProductsEntity;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
@@ -27,14 +28,14 @@ public class FeedBackSrv implements Runnable {
 
     private LinksProductsRepo linksProductsRepo;
 
-    private String urlGroup;
+    private LinksGroupEntity groupEntity;
 
     private WebDriver driver;
 
     private ErrorsRepo errorsRepo;
 
-    public FeedBackSrv(String urlGroup, LinksProductsRepo linksProductsRepo, ErrorsRepo errorsRepo) {
-        this.urlGroup = urlGroup;
+    public FeedBackSrv(LinksGroupEntity groupEntity, LinksProductsRepo linksProductsRepo, ErrorsRepo errorsRepo) {
+        this.groupEntity = groupEntity;
         this.linksProductsRepo = linksProductsRepo;
         this.errorsRepo = errorsRepo;
         System.setProperty("webdriver.chrome.driver", "/home/luckshery/IdeaProjects/aliexpress-parser/src/main/resources/chromedriver");
@@ -54,9 +55,9 @@ public class FeedBackSrv implements Runnable {
                     for (String product: products) {
                         String id = extractId(product);
                         try {
-                            countFeedBack(this.urlGroup, product, id);
+                            countFeedBack(this.groupEntity.getId(), product, id);
                         } catch (Exception e) {
-                            ErrorsEntity errorsEntity = new ErrorsEntity(this.urlGroup, product);
+                            ErrorsEntity errorsEntity = new ErrorsEntity(this.groupEntity.getId(), product);
                             errorsRepo.save(errorsEntity);
                             log.error("Error url product" + product);
                             log.error(e);
@@ -79,14 +80,14 @@ public class FeedBackSrv implements Runnable {
 //        } else return null;
 //    }
 
-    public void countFeedBack(String urlGroup, String urlProduct, String id) {
+    public void countFeedBack(Integer urlGroup, String urlProduct, String id) {
         driver.get(urlProduct);
         LinksProductsEntity entity = parseFeedback(driver, urlGroup, urlProduct, id);
         log.info(id + " success computed ");
         linksProductsRepo.save(entity);
     }
 
-    private LinksProductsEntity parseFeedback(WebDriver driver, String urlGroup, String urlProduct, String id) {
+    private LinksProductsEntity parseFeedback(WebDriver driver, Integer urlGroup, String urlProduct, String id) {
         WebElement element = driver.findElement(By.xpath("//*[@id=\"feedback\"]/iframe"));
         String urlFeedback = prefix + element.getAttribute("thesrc");
         driver.get(urlFeedback);
@@ -113,7 +114,7 @@ public class FeedBackSrv implements Runnable {
     }
 
     private List<String> parseGroup(int page) throws IOException {
-        String[] parts = urlGroup.split("1.html");
+        String[] parts = this.groupEntity.getUrlGroup().split("1.html");
         String pageProducts = parts[0] + page + ".html";
         Document doc = Jsoup.connect(pageProducts).get();
         Element listItems = doc.getElementById("list-items");

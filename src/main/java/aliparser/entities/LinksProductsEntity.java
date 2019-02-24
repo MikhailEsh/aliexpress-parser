@@ -19,7 +19,7 @@ public class LinksProductsEntity {
 
     @Basic
     @Column(name = "url_group")
-    private String urlGroup;
+    private Integer urlGroup;
 
     @Basic
     @Column(name = "url_product")

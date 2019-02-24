@@ -12,14 +12,14 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ErrorsEntity {
 
-    public ErrorsEntity(String urlGroup, String urlProduct) {
+    public ErrorsEntity(Integer urlGroup, String urlProduct) {
         this.urlGroup = urlGroup;
         this.urlProduct = urlProduct;
     }
 
     @Basic
     @Column(name = "url_group")
-    private String urlGroup;
+    private Integer urlGroup;
 
     @Basic
     @Column(name = "url_product")

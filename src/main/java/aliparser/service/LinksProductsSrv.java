@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,8 +40,19 @@ public class LinksProductsSrv {
         ExecutorService es = Executors.newFixedThreadPool(countThread);
         LinksGroupEntity group = groups.get(0);
         for (int i = 0; i < countThread; i++) {
-            FeedBackSrv feedBackSrv = new FeedBackSrv(group.getUrlGroup(), linksProductsRepo, errorsRepo);
+            FeedBackSrv feedBackSrv = new FeedBackSrv(group, linksProductsRepo, errorsRepo);
             es.execute(feedBackSrv);
+        }
+    }
+
+    public void parsesGroup(Integer id) {
+        Optional<LinksGroupEntity> group = linksGroupRepo.findById(id);
+        if (group.isPresent()) {
+            ExecutorService es = Executors.newFixedThreadPool(countThread);
+            for (int i = 0; i < countThread; i++) {
+                FeedBackSrv feedBackSrv = new FeedBackSrv(group.get(), linksProductsRepo, errorsRepo);
+                es.execute(feedBackSrv);
+            }
         }
     }
 }
