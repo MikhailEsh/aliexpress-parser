@@ -1,75 +1,46 @@
 package aliparser.service;
 
 
+import aliparser.dao.ErrorsRepo;
 import aliparser.dao.LinksGroupRepo;
 import aliparser.dao.LinksProductsRepo;
 import aliparser.entities.LinksGroupEntity;
-import aliparser.entities.LinksProductsEntity;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@Log4j2
 public class LinksProductsSrv {
 
-    private final String prefix = "https:";
+    static public AtomicInteger page = new AtomicInteger(0);
 
-    private final Integer maxPage = 100;
+    static public final Integer maxPage = 100;
+
+    private final Integer countThread = 30;
+
+    @Autowired
+    LinksProductsRepo linksProductsRepo;
 
     @Autowired
     private LinksGroupRepo linksGroupRepo;
 
     @Autowired
-    private LinksProductsRepo linksProductsRepo;
+    private ErrorsRepo errorsRepo;
 
 
     public void parsesGroups() {
         List<LinksGroupEntity> groups = linksGroupRepo.findAll();
-        for(LinksGroupEntity group: groups) {
-            String url = group.getUrlGroup();
-            String[] parts = url.split("1.html");
-            for (int i = 1; i < maxPage + 1; i++) {
-                String pageURL = parts[0] + i + ".html";
-                priceOnePage(pageURL);
-            }
-
+        ExecutorService es = Executors.newFixedThreadPool(countThread);
+        LinksGroupEntity group = groups.get(0);
+        for (int i = 0; i < countThread; i++) {
+            FeedBackSrv feedBackSrv = new FeedBackSrv(group.getUrlGroup(), linksProductsRepo, errorsRepo);
+            es.execute(feedBackSrv);
         }
-    }
-
-    private void priceOnePage(String url) {
-        try {
-            Document doc = Jsoup.connect(url).get();
-            List<String> products = parseGroup(doc);
-            List<LinksProductsEntity> productsEntities = products
-                    .stream()
-                    .map(pr -> {
-                        String prefix = pr.split(".html")[0];
-                        Integer inx = prefix.lastIndexOf("/");
-                        String id = prefix.substring(inx + 1);
-                        return new LinksProductsEntity(id, pr, url);
-                    })
-                    .collect(Collectors.toList());
-            linksProductsRepo.saveAll(productsEntities);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private List<String> parseGroup(Document doc) {
-        Element listItems = doc.getElementById("list-items");
-        Elements tags = listItems.select(".product");
-        List<String> links = tags.stream().map(tg -> {
-            String href = tg.attr("href");
-            return prefix + href;
-        }).collect(Collectors.toList());
-        return links;
     }
 }
