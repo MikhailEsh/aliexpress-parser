@@ -56,7 +56,7 @@ public class FeedBackSrv implements Runnable {
                         try {
                             countFeedBack(this.urlGroup, product, id);
                         } catch (Exception e) {
-                            ErrorsEntity errorsEntity = new ErrorsEntity(product);
+                            ErrorsEntity errorsEntity = new ErrorsEntity(this.urlGroup, product);
                             errorsRepo.save(errorsEntity);
                             log.error("Error url product" + product);
                             log.error(e);

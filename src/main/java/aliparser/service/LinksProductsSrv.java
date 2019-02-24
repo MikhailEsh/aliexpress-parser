@@ -22,7 +22,7 @@ public class LinksProductsSrv {
 
     static public final Integer maxPage = 100;
 
-    private final Integer countThread = 30;
+    private final Integer countThread = 10;
 
     @Autowired
     LinksProductsRepo linksProductsRepo;

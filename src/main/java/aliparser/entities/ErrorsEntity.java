@@ -12,13 +12,18 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ErrorsEntity {
 
-    public ErrorsEntity(String url) {
-        this.url = url;
+    public ErrorsEntity(String urlGroup, String urlProduct) {
+        this.urlGroup = urlGroup;
+        this.urlProduct = urlProduct;
     }
 
     @Basic
-    @Column(name = "url")
-    private String url;
+    @Column(name = "url_group")
+    private String urlGroup;
+
+    @Basic
+    @Column(name = "url_product")
+    private String urlProduct;
 
     @Id
     @Column(name = "id")
